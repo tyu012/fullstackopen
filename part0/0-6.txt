@@ -1,0 +1,22 @@
+title New note (SPA)
+
+note over browser
+user enters text into a form and
+clicks the button
+end note
+
+note over browser: event handler creates new note object on form submission
+
+note over browser: adds the new note to the notes list
+
+note over browser: redraws notes on webpage
+
+note right of browser
+note object is sent to server as JSON
+end note
+
+browser->server:HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+
+note over server
+note added to notes list on server
+end note
