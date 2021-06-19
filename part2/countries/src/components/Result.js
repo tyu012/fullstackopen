@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 
+// Credits: khel
+// https://stackoverflow.com/questions/863800
+import removeDiacritics from '../removeDiacritics'
+
 // Lists the country name, capital, population, and languages of a country.
 const CountryFacts = (props) => {
 	const { country } = props
@@ -50,8 +54,9 @@ const Weather = (props) => {
 
 	// some edge cases result in incorrect weather being displayed:
 	// e.g. searching 'Washington, D.C.' returns the weather for
-	// Washington, Aruba
-	// e.g. searching "Sana'a" fails to return a weather
+	// Washington, Aruba - RESOLVED
+	// e.g. searching "Sana'a" fails to return a weather - RESOLVED
+	// e.g. searching 'Bogotá' fails to return a weather
 	//
 	// these are being replaced with English characters.
 	const replacerFunction = () => {
@@ -64,9 +69,9 @@ const Weather = (props) => {
 		console.log('requesting weather for', country.capital)
 		
 		axios
-		// the regex expression below is from Petar Ivanov on Stack Overflow
+		// Credits: the regex expression below is from Petar Ivanov
 		// https://stackoverflow.com/questions/6555182
-			.get(`http://api.weatherstack.com/current?access_key=${process.env.REACT_APP_API_KEY}&query=${country.capital.replace(/[^a-zA-Z ]/g, replacerFunction)}&units=m`)
+			.get(`http://api.weatherstack.com/current?access_key=${process.env.REACT_APP_API_KEY}&query=${removeDiacritics(country.capital).replace(/[^a-zA-Z ]/g, replacerFunction)}&units=m`)
 			.then(response => {
 				console.log('receive weather', response)
 				setWeather(response)
@@ -74,7 +79,7 @@ const Weather = (props) => {
 	}, [country.capital])
 
 	if (weather.data === undefined ||
-	    weather.data.current === undefined ||
+	    weather.data.success === false ||
 			weather === {}) { return <div></div> }
 
 	return (
