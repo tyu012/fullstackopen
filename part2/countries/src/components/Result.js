@@ -48,9 +48,10 @@ const Weather = (props) => {
 
 	const [weather, setWeather] = useState({})
 
-	// some edge cases result in incorrect weather being displayed
+	// some edge cases result in incorrect weather being displayed:
 	// e.g. searching 'Washington, D.C.' returns the weather for
 	// Washington, Aruba
+	// e.g. searching "Sana'a" fails to return a weather
 	//
 	// these are being replaced with English characters.
 	const replacerFunction = () => {
@@ -63,6 +64,8 @@ const Weather = (props) => {
 		console.log('requesting weather for', country.capital)
 		
 		axios
+		// the regex expression below is from Petar Ivanov on Stack Overflow
+		// https://stackoverflow.com/questions/6555182
 			.get(`http://api.weatherstack.com/current?access_key=${process.env.REACT_APP_API_KEY}&query=${country.capital.replace(/[^a-zA-Z ]/g, replacerFunction)}&units=m`)
 			.then(response => {
 				console.log('receive weather', response)
