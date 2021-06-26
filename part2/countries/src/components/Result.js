@@ -56,7 +56,7 @@ const Weather = (props) => {
 	// e.g. searching 'Washington, D.C.' returns the weather for
 	// Washington, Aruba - RESOLVED
 	// e.g. searching "Sana'a" fails to return a weather - RESOLVED
-	// e.g. searching 'Bogotá' fails to return a weather
+	// e.g. searching 'Bogotá' fails to return a weather - RESOLVED using import
 	//
 	// these are being replaced with English characters.
 	const replacerFunction = () => {
