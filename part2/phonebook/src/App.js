@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import Notification from './components/Notification'
 
 import personService from './services/persons'
 
@@ -13,6 +14,9 @@ const App = () => {
   const [query, setQuery] = useState('')
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  // Message example:
+  // { text: "Text", successful: true }
+  const [message, setMessage] = useState(null)
 
   // reset form
   const resetForm = () => {
@@ -57,15 +61,6 @@ const App = () => {
       return
     }
 
-    // check for duplicates
-    // if (persons.find(person => person.name === newName) !== undefined) {
-    //   alert(`${newName} is already added to phonebook`)
-    //   console.log(`${newName} is already added to phonebook`)
-    //   setNewName('')
-    //   setNewNumber('')
-    //   return
-    // }
-
     // create person object using name and number
     const newPerson = {
       name: newName,
@@ -91,20 +86,38 @@ const App = () => {
           // reset forms
           resetForm()
         })
-      
-      return
-    }
+        // handle updating of entries that do not exist
+        .catch(error => {
+          setPersons(persons.filter(person => {
+            return person.id !== matchResult.id
+          }))
+          setMessage({
+            text: `Information of ${matchResult.name} has already been removed from server`,
+            successful: false
+          })
+          setTimeout(() => setMessage(null), 5000)
+        })
 
-    // save data to server
-    personService
-      .create(newPerson)
-      .then(person => {
-        // concat person object to list
-        setPersons(persons.concat(person))
-        // reset forms
-        resetForm()
-        console.log('new person added to list', persons, newPerson)
-      })
+      setMessage({ text: `Updated ${newName}`, successful: true })
+      setTimeout(() => setMessage(null), 5000)
+
+    } else {
+
+      // save data to server
+      personService
+        .create(newPerson)
+        .then(person => {
+          // concat person object to list
+          setPersons(persons.concat(person))
+          // reset forms
+          resetForm()
+          console.log('new person added to list', persons, newPerson)
+        })
+
+      setMessage({ text: `Added ${newName}`, successful: true })
+      setTimeout(() => setMessage(null), 5000)
+
+    }
   }
 
   // creates a function that deletes a specified person object upon confirmation
@@ -113,10 +126,12 @@ const App = () => {
       if (window.confirm(`Delete ${person.name}?`)) {
         personService
           .deleteUsingObject(person)
-          .then(() => {
-            console.log('deleted', person)
+          .then(data => {
             // remove person from display
             setPersons(persons.filter(p => p !== person))
+            // show message
+            setMessage({ text: `Deleted ${person.name}`, successful: true })
+            setTimeout(() => setMessage(null), 5000)
           })
       }
     }
@@ -127,6 +142,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Filter
         value={query}
         handleChange={handleQueryChange}
