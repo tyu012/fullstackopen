@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 
 // import React components
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+
+import personService from './services/persons'
 
 const App = () => {
   // state
@@ -13,14 +14,20 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
 
+  // reset form
+  const resetForm = () => {
+    setNewName('')
+    setNewNumber('')
+  }
+
   // load data from server
   useEffect(() => {
     console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
+    personService
+      .getAll()
+      .then(persons => {
         console.log('promise fulfilled')
-        setPersons(response.data)
+        setPersons(persons)
       })
   }, [])
   console.log('rendered', persons.length, 'persons')
@@ -51,13 +58,13 @@ const App = () => {
     }
 
     // check for duplicates
-    if (persons.find(person => person.name === newName) !== undefined) {
-      alert(`${newName} is already added to phonebook`)
-      console.log(`${newName} is already added to phonebook`)
-      setNewName('')
-      setNewNumber('')
-      return
-    }
+    // if (persons.find(person => person.name === newName) !== undefined) {
+    //   alert(`${newName} is already added to phonebook`)
+    //   console.log(`${newName} is already added to phonebook`)
+    //   setNewName('')
+    //   setNewNumber('')
+    //   return
+    // }
 
     // create person object using name and number
     const newPerson = {
@@ -66,13 +73,53 @@ const App = () => {
     }
     console.log('new person', newPerson)
 
-    // reset forms
-    setNewName('')
-    setNewNumber('') // not working; state changes but is not rendered
+    // check for duplicates, prompts for replacement if duplicate found
+    const matchResult = persons.find(person => person.name === newName)
+    console.log('found match:', matchResult)
 
-    // concat person object to list
-    setPersons(persons.concat(newPerson))
-    console.log('new person added to list', persons, newPerson)
+    if (matchResult !== undefined
+      && window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+
+      personService
+        .update(matchResult.id, newPerson)
+        .then(updatedPerson => {
+          console.log('updated person', updatedPerson)
+          // update the array with the replaced person
+          setPersons(persons.map(person => {
+            return person.id === updatedPerson.id ? updatedPerson : person
+          }))
+          // reset forms
+          resetForm()
+        })
+      
+      return
+    }
+
+    // save data to server
+    personService
+      .create(newPerson)
+      .then(person => {
+        // concat person object to list
+        setPersons(persons.concat(person))
+        // reset forms
+        resetForm()
+        console.log('new person added to list', persons, newPerson)
+      })
+  }
+
+  // creates a function that deletes a specified person object upon confirmation
+  const deletePerson = (person) => {
+    return () => {
+      if (window.confirm(`Delete ${person.name}?`)) {
+        personService
+          .deleteUsingObject(person)
+          .then(() => {
+            console.log('deleted', person)
+            // remove person from display
+            setPersons(persons.filter(p => p !== person))
+          })
+      }
+    }
   }
 
   console.log('rendering with', persons)
@@ -99,6 +146,7 @@ const App = () => {
       <Persons
         list={persons}
         filterString={query}
+        handleDelete={deletePerson}
       />
     </div>
   )
