@@ -100,24 +100,24 @@ const App = () => {
 
       setMessage({ text: `Updated ${newName}`, successful: true })
       setTimeout(() => setMessage(null), 5000)
-
-    } else {
-
-      // save data to server
-      personService
-        .create(newPerson)
-        .then(person => {
-          // concat person object to list
-          setPersons(persons.concat(person))
-          // reset forms
-          resetForm()
-          console.log('new person added to list', persons, newPerson)
-        })
-
-      setMessage({ text: `Added ${newName}`, successful: true })
-      setTimeout(() => setMessage(null), 5000)
-
+      
+      return
     }
+
+    // save data to server if there are no issues
+    personService
+      .create(newPerson)
+      .then(person => {
+        // concat person object to list
+        setPersons(persons.concat(person))
+        // reset forms
+        resetForm()
+        console.log('new person added to list', persons, newPerson)
+      })
+
+    setMessage({ text: `Added ${newName}`, successful: true })
+    setTimeout(() => setMessage(null), 5000)
+
   }
 
   // creates a function that deletes a specified person object upon confirmation
