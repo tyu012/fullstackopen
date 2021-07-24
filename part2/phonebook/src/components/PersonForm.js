@@ -1,7 +1,6 @@
 import React from 'react'
 
 const PersonForm = (props) => {
-	console.log('PersonForm', props)
 	const {
 		handleSubmission,
 		nameValue,

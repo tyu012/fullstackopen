@@ -1,7 +1,6 @@
 import React from 'react'
 
 const Filter = (props) => {
-	console.log('Filter', props)
 	const { value, handleChange, text } = props
 
 	return (

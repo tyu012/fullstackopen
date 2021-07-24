@@ -1,7 +1,6 @@
 import React from 'react'
 
 const Persons = (props) => {
-	console.log('Persons', props)
 	const { list, filterString, handleDelete } = props
 
 	return (
